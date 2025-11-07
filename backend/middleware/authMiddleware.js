@@ -1,13 +1,19 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'mysecretkey'; // later from .env
 
-export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
+function verifyToken(req, res, next) {
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey', (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
     next();
-  });
-};
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid token' });
+  }
+}
+
+module.exports = verifyToken;
