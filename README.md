@@ -37,3 +37,12 @@ There is still much to implement here. This is just the framework of the backend
 The current backend server url is: https://gamevault-backend-a1ce.onrender.com
 /to use this API in a file use: import { *insertCommand* } from "../../api; 
 
+
+
+
+cd backend
+npm install bcryptjs
+
+
+
+npm install jsonwebtoken

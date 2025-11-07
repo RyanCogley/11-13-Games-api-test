@@ -1,53 +1,103 @@
-// Initialize server via express
-// run "npm run devstart" to start local server. Each time project is saved, the server updates.
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
 
-const testRoutes = require("./routes/testRoutes");
-const authRoutes = require("./routes/auth"); // ✅ add this line
-const verifyToken = require("./middleware/authMiddleware"); // ✅ add this line
+// server.js - Updated with error handling and logging middleware
+// Note for TEAM: launch with npm run devstart
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
 
+dotenv.config();
+
+
+// ===== IMPORT MIDDLEWARE =====
+const authRoutes = require("./routes/auth");
+const { devLogger, prodLogger, requestLogger } = require('./middleware/logger');
+const { notFoundHandler, globalErrorHandler, AppError } = require('./middleware/errorHandler');
+const verifyToken = require("./middleware/authMiddleware"); 
+
+// ===== IMPORT ROUTES =====
+
+
+
+// ===== INITIALIZE APP =====
 const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// ✅ Auth routes (register & login)
+// ===== CORE MIDDLEWARE =====
+const allowedOrigins = [
+  "https://cs-4389-security-project-5itx3sd6g-nate-dows-projects.vercel.app/", // vercel app url in use
+  "http://localhost:5173" // for local dev
+];
+
+// 1. Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+); //hook up front end API
+
+// 2. Logging middleware
+if (NODE_ENV === 'development') {
+  app.use(devLogger); // Console logging with colors
+  console.log('🛠 Development logging enabled');
+} else {
+  app.use(prodLogger); // File logging only
+}
+app.use(requestLogger); // Security logging for all requests
+
+// ===== ROUTES =====
+
+// Root API route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'GameVault API - Server is running',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+//Product Routes
+const productRoutes = require('./routes/productRoutes');
+app.use('/products', productRoutes);
+
+// Test routes for error handling
+app.get('/test-error', (req, res, next) => {
+  next(new AppError('This is a test error - Bad Request', 400));
+});
+
+// Test programming crash (500)
+app.get('/test-crash', (req, res) => {
+  throw new Error('Simulated server crash for testing!');
+});
+
+
+// VISHNU Auth routes (register & login)
 app.use("/api/auth", authRoutes);
 
-// ✅ Example of protected routes using JWT middleware
+// VINSHNU Example of protected routes using JWT middleware
 app.get("/api/profile", verifyToken, (req, res) => {
   res.json({ message: "Welcome to your profile!", user: req.user });
 });
 
-app.get("/api/wishlist", verifyToken, (req, res) => {
-  res.json({ message: "Your wishlist data here.", user: req.user });
+
+// ===== ERROR HANDLING =====
+
+// 404 Handler (must come after all routes)
+app.use(notFoundHandler);
+
+// Global Error Handler (must be last)
+app.use(globalErrorHandler);
+
+// ===== START SERVER =====
+app.listen(PORT, () => {
+  console.log(`🚀 GameVault Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${NODE_ENV}`);
+  console.log(`📊 Logging Mode: ${NODE_ENV === 'development' ? 'Console + File' : 'File Only'}`);
+  console.log(`⏰ Started at: ${new Date().toISOString()}`);
 });
 
-app.get("/api/purchase", verifyToken, (req, res) => {
-  res.json({ message: "Your purchase history here.", user: req.user });
-});
-
-// Existing test routes (keep this)
-app.use("/api", testRoutes);
-
-app.get("/", (req, res) => {
-  console.log("✅ Root route reached");
-  res.send("Express server is running correctly!");
-});
-const gamesRoutes = require("./routes/gamesRoutes");
-app.use("/api/games", gamesRoutes);
-
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-
-//testdb.js at route folder
-const testDBRoute = require("./routes/testdb");
-app.use("/api", testDBRoute);
-
-// npm i ejs; This is a view engine that can be used to render html
-/*
-http://localhost:8080/
-the link above is how to see if the code works.
-*/
+module.exports = app;
