@@ -18,12 +18,12 @@ import UserButton from "./components/shared/UserButton";
 
 // Fallback data (optional)
 const LOCAL_GAMES = [
-  { id: 1, name_of_product: "Elden Ring", price: 59.99, topSeller: true, img_url: "/images/eldenring.jpg" },
-  { id: 2, name_of_product: "Starfield", price: 69.99, topSeller: true, img_url: "/images/starfield.jpg" },
-  { id: 3, name_of_product: "Spider-Man 2", price: 59.99, topSeller: true, img_url: "/images/spiderman2.webp" },
-  { id: 4, name_of_product: "Zelda: Tears of the Kingdom", price: 69.99, topSeller: false, img_url: "/images/zelda.jpg" },
-  { id: 5, name_of_product: "God of War: Ragnarok", price: 59.99, topSeller: false, img_url: "/images/godofwar.avif" },
-  { id: 6, name_of_product: "Cyberpunk 2077", price: 49.99, topSeller: false, img_url: "/images/cyberpunk.jpg" },
+  { id: 1, name_of_product: "Elden Ring", price: 59.99, topSeller: true, image_url: "/images/eldenring.jpg" },
+  { id: 2, name_of_product: "Starfield", price: 69.99, topSeller: true, image_url: "/images/starfield.jpg" },
+  { id: 3, name_of_product: "Spider-Man 2", price: 59.99, topSeller: true, image_url: "/images/spiderman2.webp" },
+  { id: 4, name_of_product: "Zelda: Tears of the Kingdom", price: 69.99, topSeller: false, image_url: "/images/zelda.jpg" },
+  { id: 5, name_of_product: "God of War: Ragnarok", price: 59.99, topSeller: false, image_url: "/images/godofwar.avif" },
+  { id: 6, name_of_product: "Cyberpunk 2077", price: 49.99, topSeller: false, image_url: "/images/cyberpunk.jpg" },
 ];
 
 export default function App() {
